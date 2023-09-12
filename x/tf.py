@@ -7,7 +7,7 @@
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
-mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+mnist = input_data.read_data_sets("MNIST_data", one_hot=True)
 
 
 # 初始化生成随机的权重(变量)，避免神经元输出恒为0
@@ -25,13 +25,12 @@ def bias_variable(shape):
 
 # 卷积采用1步长，0边距，保证输入输出大小相同
 def conv2d(x, w):
-    return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1], padding="SAME")
 
 
 # 池化采用2×2模板
 def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
-                          strides=[1, 2, 2, 1], padding='SAME')
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
 
 # 28*28=784
@@ -88,13 +87,18 @@ sess.run(tf.global_variables_initializer())
 for i in range(20000):
     batch = mnist.train.next_batch(50)
     if i % 100 == 0:
-        train_accuracy = accuracy.eval(feed_dict={
-            x: batch[0], y_: batch[1], keep_prob: 1.0})
-        print('step %d, training accuracy %g' % (i, train_accuracy))
+        train_accuracy = accuracy.eval(
+            feed_dict={x: batch[0], y_: batch[1], keep_prob: 1.0}
+        )
+        print("step %d, training accuracy %g" % (i, train_accuracy))
     train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
-print('test accuracy %g' % accuracy.eval(feed_dict={
-    x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+print(
+    "test accuracy %g"
+    % accuracy.eval(
+        feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}
+    )
+)
 
-if __name__ == '__main__':
-    print('===========********Starting********===========')
+if __name__ == "__main__":
+    print("===========********Starting********===========")

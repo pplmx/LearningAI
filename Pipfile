@@ -1,13 +1,11 @@
 [[source]]
-
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
-
+numpy = "*"
+tensorflow = "*"
+pytest = "*"
 
 [dev-packages]
-
