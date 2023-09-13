@@ -45,23 +45,20 @@ class NeuralNetwork:
     ) -> Tuple[float, Dict[str, np.ndarray]]:
         """反向传播,返回损失和梯度"""
         # 前向传播
-        x = inputs
-        for w, b in zip(self.weights, self.biases):
-            x = np.dot(x, w) + b
-            x = self.activation(x)
-        pred = x
+        pred = self.inference(inputs)
 
         # 计算损失
+        activations, grads = [], {}
         loss = self.loss_fn(pred, labels)
+        delta = self.loss_fn.grad(pred, labels) * self.activation.grad(pred)
 
-        # 反向传播
-        grads = {}
-        delta = (pred - labels) * self.activation.grad(x)
+        # 反向传播计算梯度
         for i in reversed(range(len(self.weights))):
-            grads[f"W{i+1}"] = np.outer(delta, x)
+            grads[f"W{i+1}"] = np.outer(delta, activations[i])
             grads[f"b{i+1}"] = delta
-            delta = np.dot(delta, self.weights[i].T) * self.activation.grad(x[:-1])
-            x = x[:-1]
+            delta = np.dot(delta, self.weights[i].T) * self.activation.grad(
+                activations[i]
+            )
 
         return loss, grads
 
@@ -75,13 +72,6 @@ class NeuralNetwork:
         self.weights = params["weights"]
         self.biases = params["biases"]
 
-    def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
-        """模型训练"""
-        X, y = dataset
-        for i in range(epoch):
-            loss, grads = self.backprop(X, y)
-            self.optimize(grads)
-
     def optimize(self, grads: Dict[str, np.ndarray]) -> None:
         """使用SGD更新权重"""
         for k, v in grads.items():
@@ -90,9 +80,18 @@ class NeuralNetwork:
             if "b" in k:
                 self.biases[int(k[1:])] -= self.lr * np.sum(v)
 
-    def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> float:
+    def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
+        """模型训练
+        epoch: 训练轮数
+        dataset: 训练数据集, (X, y) 分别是输入和标签
+        """
+        for _ in range(epoch):
+            _, grads = self.backprop(*dataset)
+            self.optimize(grads)
+
+    def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
         """测试模型,返回准确率"""
         X, y = dataset
         pred = self.inference(X)
-        acc = np.mean(pred == y)
-        return acc
+
+        assert np.allclose(pred, y, atol=1e-2)

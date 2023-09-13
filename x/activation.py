@@ -5,6 +5,9 @@ class Sigmoid:
     def __call__(self, x):
         return 1 / (1 + np.exp(-x))
 
+    def grad(self, x):
+        return self(x) * (1 - self(x))
+
 
 class Tanh:
     def __call__(self, x):
