@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import json
 from typing import Dict, List, Tuple
 
 import numpy as np
 
-from activation import Sigmoid
-from losses import MSELoss
+from activation import Sigmoid, Activation, Tanh, ReLU
+from losses import MSELoss, Loss, CrossEntropyLoss, L1Loss
 
 
 class NeuralNetwork:
     def __init__(
-        self, layers: List[int], lr: float = 0.01, momentum: float = 0.9
+        self,
+        layers: List[int],
+        lr: float = 0.01,
+        momentum: float = 0.9,
+        activation: Activation = Sigmoid(),
+        loss_fn: Loss = MSELoss(),
     ) -> None:
         """
         构造函数
@@ -27,28 +32,30 @@ class NeuralNetwork:
         self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
         self.biases = [np.zeros(y) for y in layers[1:]]
 
-        self.activation = Sigmoid()
-        self.loss_fn = MSELoss()
+        self.activation = activation
+        self.loss_fn = loss_fn
 
-    def inference(self, inputs: np.ndarray) -> np.ndarray:
-        """前向传播,返回输出"""
+    def inference(self, inputs: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
+        """前向传播,返回输出和中间变量"""
         x = inputs
+        activations = [x]
         for w, b in zip(self.weights, self.biases):
             # x * w + b
             x = np.dot(x, w) + b
             # 激活函数
             x = self.activation(x)
-        return x
+            activations.append(x)
+        return x, activations
 
     def backprop(
         self, inputs: np.ndarray, labels: np.ndarray
     ) -> Tuple[float, Dict[str, np.ndarray]]:
         """反向传播,返回损失和梯度"""
         # 前向传播
-        pred = self.inference(inputs)
+        pred, activations = self.inference(inputs)
 
         # 计算损失
-        activations, grads = [], {}
+        grads = {}
         loss = self.loss_fn(pred, labels)
         delta = self.loss_fn.grad(pred, labels) * self.activation.grad(pred)
 
@@ -64,13 +71,52 @@ class NeuralNetwork:
 
     def save(self, path: str) -> None:
         """保存模型参数到文件"""
-        np.savez(path, weights=self.weights, biases=self.biases)
+
+        model_dict = {
+            "layers": self.layers,
+            "weights": [w.tolist() for w in self.weights],
+            "biases": [b.tolist() for b in self.biases],
+            "lr": self.lr,
+            "momentum": self.momentum,
+            "activation": str(self.activation),
+            "loss_fn": str(self.loss_fn),
+        }
+
+        with open(path, "w") as f:
+            json.dump(model_dict, f)
 
     def load(self, path: str) -> None:
         """从文件加载模型参数"""
-        params = np.load(path)
-        self.weights = params["weights"]
-        self.biases = params["biases"]
+        with open(path) as f:
+            model_dict = json.load(f)
+
+        self.layers = model_dict["layers"]
+        self.weights = [np.array(w) for w in model_dict["weights"]]
+        self.biases = [np.array(b) for b in model_dict["biases"]]
+        self.lr = model_dict["lr"]
+        self.momentum = model_dict["momentum"]
+
+        # Note: You'll need to implement a way to correctly restore the activation and loss functions here
+        match model_dict["activation"]:
+            case "Sigmoid()":
+                self.activation = Sigmoid()
+            case "Tanh()":
+                self.activation = Tanh()
+            case "ReLU()":
+                self.activation = ReLU()
+            case _:
+                raise ValueError(
+                    f"Unknown activation function: {model_dict['activation']}"
+                )
+        match model_dict["loss_fn"]:
+            case "MSELoss()":
+                self.loss_fn = MSELoss()
+            case "CrossEntropyLoss()":
+                self.loss_fn = CrossEntropyLoss()
+            case "L1Loss()":
+                self.loss_fn = L1Loss()
+            case _:
+                raise ValueError(f"Unknown loss function: {model_dict['loss_fn']}")
 
     def optimize(self, grads: Dict[str, np.ndarray]) -> None:
         """使用SGD更新权重"""
@@ -83,7 +129,7 @@ class NeuralNetwork:
     def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
         """模型训练
         epoch: 训练轮数
-        dataset: 训练数据集, (X, y) 分别是输入和标签
+        dataset: 训练数据集, 分别是输入和标签
         """
         for _ in range(epoch):
             _, grads = self.backprop(*dataset)
@@ -92,6 +138,6 @@ class NeuralNetwork:
     def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
         """测试模型,返回准确率"""
         X, y = dataset
-        pred = self.inference(X)
+        pred, _ = self.inference(X)
 
         assert np.allclose(pred, y, atol=1e-2)
