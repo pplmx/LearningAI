@@ -76,6 +76,36 @@ class NeuralNetwork:
 
         return loss, grads
 
+    def optimize(self, grads: Dict[str, np.ndarray]) -> None:
+        """使用带动量的SGD更新权重"""
+        for k, v in grads.items():
+            if "W" in k:
+                i = int(k[1:])
+                self.vw[i] = self.momentum * self.vw[i] + (1 - self.momentum) * v
+                self.weights[i] -= self.lr * self.vw[i]
+            if "b" in k:
+                i = int(k[1:])
+                self.vb[i] = self.momentum * self.vb[i] + (1 - self.momentum) * np.sum(
+                    v
+                )
+                self.biases[i] -= self.lr * self.vb[i]
+
+    def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
+        """模型训练
+        epoch: 训练轮数
+        dataset: 训练数据集, [输入,标签]
+        """
+        for _ in range(epoch):
+            _, grads = self.backprop(*dataset)
+            self.optimize(grads)
+
+    def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
+        """测试模型,返回准确率"""
+        x, y = dataset
+        pred, _ = self.inference(x)
+
+        assert np.allclose(pred, y, atol=1e-2)
+
     def save(self, path: str) -> None:
         """保存模型参数到文件"""
 
@@ -124,33 +154,3 @@ class NeuralNetwork:
                 self.loss_fn = L1Loss()
             case _:
                 raise ValueError(f"Unknown loss function: {model_dict['loss_fn']}")
-
-    def optimize(self, grads: Dict[str, np.ndarray]) -> None:
-        """使用带动量的SGD更新权重"""
-        for k, v in grads.items():
-            if "W" in k:
-                i = int(k[1:])
-                self.vw[i] = self.momentum * self.vw[i] + (1 - self.momentum) * v
-                self.weights[i] -= self.lr * self.vw[i]
-            if "b" in k:
-                i = int(k[1:])
-                self.vb[i] = self.momentum * self.vb[i] + (1 - self.momentum) * np.sum(
-                    v
-                )
-                self.biases[i] -= self.lr * self.vb[i]
-
-    def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
-        """模型训练
-        epoch: 训练轮数
-        dataset: 训练数据集, 分别是输入和标签
-        """
-        for _ in range(epoch):
-            _, grads = self.backprop(*dataset)
-            self.optimize(grads)
-
-    def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
-        """测试模型,返回准确率"""
-        x, y = dataset
-        pred, _ = self.inference(x)
-
-        assert np.allclose(pred, y, atol=1e-2)
