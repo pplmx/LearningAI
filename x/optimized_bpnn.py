@@ -28,12 +28,19 @@ class NeuralNetwork:
         self.lr = lr
         self.momentum = momentum
 
-        # 初始化权重和偏置
-        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
+        # 初始化权重和偏置 (使用He初始化)
+        self.weights = [
+            np.random.randn(y, x) * np.sqrt(2 / x)
+            for x, y in zip(layers[:-1], layers[1:])
+        ]
         self.biases = [np.zeros(y) for y in layers[1:]]
 
         self.activation = activation
         self.loss_fn = loss_fn
+
+        # 初始化动量项
+        self.vw = [np.zeros_like(w) for w in self.weights]
+        self.vb = [np.zeros_like(b) for b in self.biases]
 
     def inference(self, inputs: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
         """前向传播,返回输出和中间变量"""
@@ -119,12 +126,18 @@ class NeuralNetwork:
                 raise ValueError(f"Unknown loss function: {model_dict['loss_fn']}")
 
     def optimize(self, grads: Dict[str, np.ndarray]) -> None:
-        """使用SGD更新权重"""
+        """使用带动量的SGD更新权重"""
         for k, v in grads.items():
             if "W" in k:
-                self.weights[int(k[1:])] -= self.lr * v
+                i = int(k[1:])
+                self.vw[i] = self.momentum * self.vw[i] + (1 - self.momentum) * v
+                self.weights[i] -= self.lr * self.vw[i]
             if "b" in k:
-                self.biases[int(k[1:])] -= self.lr * np.sum(v)
+                i = int(k[1:])
+                self.vb[i] = self.momentum * self.vb[i] + (1 - self.momentum) * np.sum(
+                    v
+                )
+                self.biases[i] -= self.lr * self.vb[i]
 
     def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
         """模型训练
@@ -137,7 +150,7 @@ class NeuralNetwork:
 
     def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
         """测试模型,返回准确率"""
-        X, y = dataset
-        pred, _ = self.inference(X)
+        x, y = dataset
+        pred, _ = self.inference(x)
 
         assert np.allclose(pred, y, atol=1e-2)
