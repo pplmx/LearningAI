@@ -9,14 +9,16 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'baidu_search'
+BOT_NAME = "baidu_search"
 
-SPIDER_MODULES = ['baidu_search.spiders']
-NEWSPIDER_MODULE = 'baidu_search.spiders'
+SPIDER_MODULES = ["baidu_search.spiders"]
+NEWSPIDER_MODULE = "baidu_search.spiders"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) ' \
-             'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36"
+)
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
