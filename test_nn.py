@@ -1,7 +1,5 @@
 import numpy as np
-
-from x import bpnn
-from x import optimized_bpnn
+from x import bpnn, optimized_bpnn
 
 
 def test_nn():

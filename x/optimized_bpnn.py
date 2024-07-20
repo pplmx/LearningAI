@@ -4,9 +4,8 @@ import json
 from typing import Dict, List, Tuple
 
 import numpy as np
-
-from activation import Sigmoid, Activation, Tanh, ReLU, LeakyReLU
-from losses import MSELoss, Loss, CrossEntropyLoss, L1Loss
+from activation import Activation, LeakyReLU, ReLU, Sigmoid, Tanh
+from losses import CrossEntropyLoss, L1Loss, Loss, MSELoss
 
 
 class NeuralNetwork:
