@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # Define here the models for your spider middleware
 #
@@ -8,7 +7,7 @@
 from scrapy import signals
 
 
-class BaiduSearchSpiderMiddleware(object):
+class BaiduSearchSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -56,7 +55,7 @@ class BaiduSearchSpiderMiddleware(object):
         spider.logger.info("Spider opened: %s" % spider.name)
 
 
-class BaiduSearchDownloaderMiddleware(object):
+class BaiduSearchDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.

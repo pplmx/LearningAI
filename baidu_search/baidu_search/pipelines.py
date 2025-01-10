@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # Define your item pipelines here
 #
@@ -6,6 +5,6 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-class BaiduSearchPipeline(object):
+class BaiduSearchPipeline:
     def process_item(self, item, spider):
         return item

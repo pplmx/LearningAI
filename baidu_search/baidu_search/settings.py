@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # Scrapy settings for baidu_search project
 #

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import json
-from typing import Dict, List, Tuple
 
 import numpy as np
 from activation import Activation, LeakyReLU, ReLU, Sigmoid, Tanh
@@ -11,7 +9,7 @@ from losses import CrossEntropyLoss, L1Loss, Loss, MSELoss
 class NeuralNetwork:
     def __init__(
         self,
-        layers: List[int],
+        layers: list[int],
         lr: float = 0.01,
         momentum: float = 0.9,
         activation: Activation = Sigmoid(),
@@ -38,7 +36,7 @@ class NeuralNetwork:
         # 初始化权重和偏置 (使用He初始化)
         self.weights = [
             np.random.randn(y, x) * np.sqrt(2 / x)
-            for x, y in zip(layers[:-1], layers[1:])
+            for x, y in zip(layers[:-1], layers[1:], strict=False)
         ]
         self.biases = [np.zeros(y) for y in layers[1:]]
 
@@ -49,11 +47,11 @@ class NeuralNetwork:
         self.vw = [np.zeros_like(w) for w in self.weights]
         self.vb = [np.zeros_like(b) for b in self.biases]
 
-    def inference(self, inputs: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
+    def inference(self, inputs: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
         """前向传播,返回输出和中间变量"""
         x = inputs
         activations = [x]
-        for w, b in zip(self.weights, self.biases):
+        for w, b in zip(self.weights, self.biases, strict=False):
             # x * w + b
             x = np.dot(x, w) + b
             # 激活函数
@@ -63,7 +61,7 @@ class NeuralNetwork:
 
     def backprop(
         self, inputs: np.ndarray, labels: np.ndarray
-    ) -> Tuple[float, Dict[str, np.ndarray]]:
+    ) -> tuple[float, dict[str, np.ndarray]]:
         """反向传播,返回损失和梯度"""
         # 前向传播
         pred, activations = self.inference(inputs)
@@ -75,15 +73,15 @@ class NeuralNetwork:
 
         # 反向传播计算梯度
         for i in reversed(range(len(self.weights))):
-            grads[f"W{i+1}"] = np.outer(delta, activations[i])
-            grads[f"b{i+1}"] = delta
+            grads[f"W{i + 1}"] = np.outer(delta, activations[i])
+            grads[f"b{i + 1}"] = delta
             delta = np.dot(delta, self.weights[i].T) * self.activation.grad(
                 activations[i]
             )
 
         return loss, grads
 
-    def optimize(self, grads: Dict[str, np.ndarray]) -> None:
+    def optimize(self, grads: dict[str, np.ndarray]) -> None:
         """使用带动量的SGD更新权重"""
         for k, v in grads.items():
             if "W" in k:
@@ -99,7 +97,7 @@ class NeuralNetwork:
                 )
                 self.biases[i] -= self.lr * (self.vb[i] + self.l2_reg * self.biases[i])
 
-    def train(self, epoch: int, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
+    def train(self, epoch: int, dataset: tuple[np.ndarray, np.ndarray]) -> None:
         """模型训练
         epoch: 训练轮数
         dataset: 训练数据集 - [输入, 标签]
@@ -118,7 +116,7 @@ class NeuralNetwork:
                 _, grads = self.backprop(batch_data, batch_labels)
                 self.optimize(grads)
 
-    def test(self, dataset: Tuple[np.ndarray, np.ndarray]) -> None:
+    def test(self, dataset: tuple[np.ndarray, np.ndarray]) -> None:
         """测试模型,返回准确率"""
         x, y = dataset
         pred, _ = self.inference(x)

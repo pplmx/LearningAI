@@ -14,7 +14,7 @@ class NeuralNetwork:
         self.layers = layers
 
         # 权重矩阵初始化为小的随机数
-        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
+        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:], strict=False)]
 
         # 偏置向量初始化为小的随机数
         self.biases = [np.random.randn(x, 1) for x in layers[1:]]
@@ -34,7 +34,7 @@ class NeuralNetwork:
         - 输出层的激活值
         """
         a = x
-        for w, b in zip(self.weights, self.biases):
+        for w, b in zip(self.weights, self.biases, strict=False):
             # 权重矩阵点乘输入加偏置
             z = np.dot(w, a) + b
             # 通过激活函数
@@ -56,7 +56,7 @@ class NeuralNetwork:
         loss = 0
         a = x
 
-        for i, (w, b) in enumerate(zip(self.weights, self.biases)):
+        for i, (w, b) in enumerate(zip(self.weights, self.biases, strict=False)):
             # 前向传播
             z = np.dot(w, a) + b
             a = self.sigmoid(z)
