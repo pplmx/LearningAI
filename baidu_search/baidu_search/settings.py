@@ -1,4 +1,3 @@
-
 # Scrapy settings for baidu_search project
 #
 # For simplicity, this file contains only settings considered important or

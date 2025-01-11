@@ -14,7 +14,9 @@ class NeuralNetwork:
         self.layers = layers
 
         # 权重矩阵初始化为小的随机数
-        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:], strict=False)]
+        self.weights = [
+            np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:], strict=False)
+        ]
 
         # 偏置向量初始化为小的随机数
         self.biases = [np.random.randn(x, 1) for x in layers[1:]]
