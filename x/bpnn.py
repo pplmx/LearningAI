@@ -14,9 +14,7 @@ class NeuralNetwork:
         self.layers = layers
 
         # 权重矩阵初始化为小的随机数
-        self.weights = [
-            np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:], strict=False)
-        ]
+        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:], strict=False)]
 
         # 偏置向量初始化为小的随机数
         self.biases = [np.random.randn(x, 1) for x in layers[1:]]
@@ -67,11 +65,7 @@ class NeuralNetwork:
             if i == len(self.weights) - 1:
                 loss += np.sum((y - a) ** 2)
             # 反向传播误差
-            err = (
-                (y - a)
-                if i == len(self.weights) - 1
-                else np.dot(self.weights[i + 1].T, err)
-            )
+            err = (y - a) if i == len(self.weights) - 1 else np.dot(self.weights[i + 1].T, err)
 
             # 计算梯度
             dw = np.outer(a, err) + self.lambd * w  # 加入了L2正则化
@@ -101,9 +95,7 @@ class NeuralNetwork:
             loss, grads = self.backward(X, y)
             for k, v in grads.items():
                 # 添加动量
-                self.velocity[int(k[1:])] = (
-                    momentum * self.velocity[int(k[1:])] - lr * v
-                )
+                self.velocity[int(k[1:])] = momentum * self.velocity[int(k[1:])] - lr * v
                 self.weights[int(k[1:])] += self.velocity[int(k[1:])]
                 self.biases[int(k[1:])] -= lr * v.sum(axis=0)
 

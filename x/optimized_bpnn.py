@@ -34,10 +34,7 @@ class NeuralNetwork:
         self.l2_reg = l2_reg
 
         # 初始化权重和偏置 (使用He初始化)
-        self.weights = [
-            np.random.randn(y, x) * np.sqrt(2 / x)
-            for x, y in zip(layers[:-1], layers[1:], strict=False)
-        ]
+        self.weights = [np.random.randn(y, x) * np.sqrt(2 / x) for x, y in zip(layers[:-1], layers[1:], strict=False)]
         self.biases = [np.zeros(y) for y in layers[1:]]
 
         self.activation = activation
@@ -59,9 +56,7 @@ class NeuralNetwork:
             activations.append(x)
         return x, activations
 
-    def backprop(
-        self, inputs: np.ndarray, labels: np.ndarray
-    ) -> tuple[float, dict[str, np.ndarray]]:
+    def backprop(self, inputs: np.ndarray, labels: np.ndarray) -> tuple[float, dict[str, np.ndarray]]:
         """反向传播,返回损失和梯度"""
         # 前向传播
         pred, activations = self.inference(inputs)
@@ -75,9 +70,7 @@ class NeuralNetwork:
         for i in reversed(range(len(self.weights))):
             grads[f"W{i + 1}"] = np.outer(delta, activations[i])
             grads[f"b{i + 1}"] = delta
-            delta = np.dot(delta, self.weights[i].T) * self.activation.grad(
-                activations[i]
-            )
+            delta = np.dot(delta, self.weights[i].T) * self.activation.grad(activations[i])
 
         return loss, grads
 
@@ -87,14 +80,10 @@ class NeuralNetwork:
             if "W" in k:
                 i = int(k[1:])
                 self.vw[i] = self.momentum * self.vw[i] + (1 - self.momentum) * v
-                self.weights[i] -= self.lr * (
-                    self.vw[i] + self.l2_reg * self.weights[i]
-                )
+                self.weights[i] -= self.lr * (self.vw[i] + self.l2_reg * self.weights[i])
             if "b" in k:
                 i = int(k[1:])
-                self.vb[i] = self.momentum * self.vb[i] + (1 - self.momentum) * np.sum(
-                    v
-                )
+                self.vb[i] = self.momentum * self.vb[i] + (1 - self.momentum) * np.sum(v)
                 self.biases[i] -= self.lr * (self.vb[i] + self.l2_reg * self.biases[i])
 
     def train(self, epoch: int, dataset: tuple[np.ndarray, np.ndarray]) -> None:
@@ -161,9 +150,7 @@ class NeuralNetwork:
             case "LeakyReLU()":
                 self.activation = LeakyReLU()
             case _:
-                raise ValueError(
-                    f"Unknown activation function: {model_dict['activation']}"
-                )
+                raise ValueError(f"Unknown activation function: {model_dict['activation']}")
         match model_dict["loss_fn"]:
             case "MSELoss()":
                 self.loss_fn = MSELoss()

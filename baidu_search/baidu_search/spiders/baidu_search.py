@@ -12,16 +12,12 @@ class BaiduSearchSpider(scrapy.Spider):
     start_urls = ["https://www.baidu.com/s?wd=机器学习"]
 
     def parse(self, resp):
-        href_list = resp.xpath(
-            '//div[contains(@class, "c-container")]/h3/a/@href'
-        ).extract()
+        href_list = resp.xpath('//div[contains(@class, "c-container")]/h3/a/@href').extract()
         container_list = resp.xpath('//div[contains(@class, "c-container")]')
         for container in container_list:
             href = container.xpath("h3/a/@href").extract()[0]
             title = remove_tags(container.xpath("h3/a").extract()[0])
-            c_abstract = container.xpath(
-                'div/div/div[contains(@class, "c-abstract")]'
-            ).extract()
+            c_abstract = container.xpath('div/div/div[contains(@class, "c-abstract")]').extract()
             abstract = ""
             if len(c_abstract) > 0:
                 abstract = remove_tags(c_abstract[0])
